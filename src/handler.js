@@ -85,15 +85,19 @@ const addBookHandler = (request, h) => {
 
 const getAllBooksHandler = (request, h) => {
   function convertTrueOrFalse(val) {
-    if (val === 1) {
+    if (val == 1) {
       return true;
     }
     return false;
   }
 
+  console.log(request.query);
+
   const queryName = request.query.name;
   const queryReading = convertTrueOrFalse(request.query.reading);
   const queryFinished = convertTrueOrFalse(request.query.finished);
+
+  console.log(queryName, queryReading, queryFinished);
 
   if (books === undefined) {
     return {
@@ -104,58 +108,24 @@ const getAllBooksHandler = (request, h) => {
     };
   }
 
-  if (queryName !== undefined || queryReading !== undefined || queryFinished !== undefined) {
-    if (queryName !== undefined) {
-      const result = books.filter((str) => str.includes(queryName));
-      const response = h.response({
-        status: 'success',
-        data: {
-          books: result.map((book) => ({
-            id: book.id,
-            name: book.name,
-            publisher: book.publisher,
-          })),
-        },
-      });
-      response.code(200);
-      return response;
-    }
-    if (queryReading !== undefined) {
-      const result = books.filter((b) => b.reading === queryReading);
-      const response = h.response({
-        status: 'success',
-        data: {
-          books: result.map((book) => ({
-            id: book.id,
-            name: book.name,
-            publisher: book.publisher,
-          })),
-        },
-      });
-      response.code(200);
-      return response;
-    }
-    if (queryFinished !== undefined) {
-      const result = books.filter((b) => b.finished === queryFinished);
-      const response = h.response({
-        status: 'success',
-        data: {
-          books: result.map((book) => ({
-            id: book.id,
-            name: book.name,
-            publisher: book.publisher,
-          })),
-        },
-      });
-      response.code(200);
-      return response;
-    }
+  let result = books;
+
+  if (request.query.name) {
+    result = books.filter((book) => book.name.toLowerCase().includes(queryName.toLowerCase()));
   }
+
+  if (request.query.reading) {
+    result = books.filter((b) => b.reading == queryReading);
+  }
+
+  if (request.query.finished) {
+    result = books.filter((b) => b.finished == queryFinished);
+  }  
 
   const response = h.response({
     status: 'success',
     data: {
-      books: books.map((book) => ({
+      books: result.map((book) => ({
         id: book.id,
         name: book.name,
         publisher: book.publisher,
